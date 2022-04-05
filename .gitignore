@@ -1,4 +1,4 @@
 #docx files
-.docx
+*.docx
 
-.doc
+*.docx
