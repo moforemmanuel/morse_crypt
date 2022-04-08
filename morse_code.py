@@ -3,54 +3,58 @@
 # Student No:
 
 # A Morse code encoder/decoder
+"""path module for checking file existence"""
+from os import path
 
 MORSE_CODE = (
-    ("-...", "B"), (".-", "A"), ("-.-.", "C"), ("-..", "D"), (".", "E"), ("..-.", "F"), ("--.", "G"),
-    ("....", "H"), ("..", "I"), (".---", "J"), ("-.-", "K"), (".-..", "L"), ("--", "M"), ("-.", "N"),
-    ("---", "O"), (".--.", "P"), ("--.-", "Q"), (".-.", "R"), ("...", "S"), ("-", "T"), ("..-", "U"),
-    ("...-", "V"), (".--", "W"), ("-..-", "X"), ("-.--", "Y"), ("--..", "Z"), (".-.-.-", "."),
-    ("-----", "0"), (".----", "1"), ("..---", "2"), ("...--", "3"), ("....-", "4"), (".....", "5"), 
-    ("-....", "6"), ("--...", "7"), ("---..", "8"), ("----.", "9"), ("-.--.", "("), ("-.--.-", ")"),
-    (".-...", "&"), ("---...", ":"), ("-.-.-.", ";"), ("-...-", "="), (".-.-.", "+"), ("-....-", "-"),
-    ("..--.-", "_"), (".-..-.", '"'), ("...-..-", "$"), (".--.-.", "@"), ("..--..", "?"), ("-.-.--", "!")
+    ("-...", "B"), (".-", "A"), ("-.-.", "C"), ("-..", "D"), (".", "E"),
+    ("..-.", "F"), ("--.", "G"), ("....", "H"), ("..", "I"), (".---", "J"),
+    ("-.-", "K"), (".-..", "L"), ("--", "M"), ("-.", "N"), ("---", "O"),
+    (".--.", "P"), ("--.-", "Q"), (".-.", "R"), ("...", "S"), ("-", "T"),
+    ("..-", "U"), ("...-", "V"), (".--", "W"), ("-..-", "X"), ("-.--", "Y"),
+    ("--..", "Z"), (".-.-.-", "."), ("-----", "0"), (".----", "1"), ("..---", "2"),
+    ("...--", "3"), ("....-", "4"), (".....", "5"), ("-....", "6"), ("--...", "7"),
+    ("---..", "8"), ("----.", "9"), ("-.--.", "("), ("-.--.-", ")"), (".-...", "&"),
+    ("---...", ":"), ("-.-.-.", ";"), ("-...-", "="), (".-.-.", "+"), ("-....-", "-"),
+    ("..--.-", "_"), (".-..-.", '"'), ("...-..-", "$"), (".--.-.", "@"), ("..--..", "?"),
+    ("-.-.--", "!")
 )
 
-# morse = '-... .- -... .-   --. --- -..'
-morse = 'BABA GOD'
-
-
-
-
-
-
 def print_intro():
+    """Intro function which displays welcome message and what the program does"""
+
     print("Welcome to Wolmorse")
     print("This program encodes and decodes Morse code.")
 
 
 def get_input():
+    """function to get the mode of operation, and the message to perform the operation on"""
+
     while True:
         mode = input('Would you like to encode (e) or decode (d) : ')
         if mode == 'e':
             message = input('What message would you like to encode : ')
+            # message = message if message.isupper() else message.upper()
             break
-        elif mode == 'd':
+        if mode == 'd':
             message = input('What message would you like to decode : ')
             break
-        else:
-            print('Invalid mode')
-    
+
+        print('Invalid mode')
+
     return (mode, message)
 
 
 def encode(message):
+    """function which performs encoding of a message"""
+
     morse_words = message.split(' ')
     morse_string = []
     for morse_word in morse_words:
         morse_code = []
         for morse_char in morse_word:
             for morse_map in MORSE_CODE:
-                if morse_char in morse_map:
+                if morse_char == morse_map[1]:
                     morse_code.append(morse_map[0])
         morse_string.append(' '.join(morse_code))
 
@@ -58,7 +62,10 @@ def encode(message):
     return encoded_str
 
 
+
 def decode(message):
+    """function which performs decoding of a message"""
+
     morse_words = message.split('   ')
     morse_string = []
     for word in morse_words:
@@ -67,57 +74,105 @@ def decode(message):
 
         for morse_char in morse_chars:
             for morse_map in MORSE_CODE:
-                if morse_char in morse_map:
+                if morse_char == morse_map[0]:
                     morse_alpha += morse_map[1]
         morse_string.append(morse_alpha)
-                
+
     decoded_str = ' '.join(morse_string)
     return decoded_str
+
 
 # ---------- Challenge Functions (Optional) ----------
 
 
 def process_lines(filename, mode):
-    pass
+    """function which reads the lines of a file and performs an operation on it
+    based on the mode the user inputs"""
+
+    with open(filename) as input_file:
+        messages = input_file.read().splitlines()
+
+    if mode == 'e':
+        result = list(map(encode, messages))
+
+    elif mode == 'd':
+        result = list(map(decode, messages))
+
+    return result
 
 
 def write_lines(lines):
-    pass
+    """function which writes to a file the result of an operation"""
+
+    with open('results.txt', 'w') as output_file:
+        output_file.writelines("%s\n" % line for line in lines)
 
 
 def check_file_exists(filename):
-    pass
+    """function which checks the existence of a file in the currwnt directory"""
+
+    return path.exists(filename)
+
+def get_filename():
+    """function to get file name alone, serves as a decomposed function of get_filename_input()"""
+
+    while True:
+        filename = input('Enter a filename : ')
+        if check_file_exists(filename):
+            break
+        print('Invalid filename')
+
+    return filename
+
+def valid_mode_controller(mode):
+    """function executed for a valid mode, needed inorder to reduce nested loop complexity
+    and pep8 compliancy"""
+
+    while True:
+        action = input('Would you like to read from a file (f) for console (c) : ')
+        if action == 'c':
+            filename = None
+            if mode == 'e':
+                message = input('What message would you like to encode : ')
+                message = message if message.isupper() else message.upper()
+                break
+            if mode == 'd':
+                message = input('What message would you like to decode : ')
+                break
+
+        elif action == 'f':
+            message = None
+            while True:
+                filename = input('Enter a filename : ')
+                if check_file_exists(filename):
+                    break
+                print('Invalid filename')
+
+            break
+
+        else:
+            print('Invalid action')
+
+    return (message, filename)
+
+def get_filename_input():
+    """function which requests the mode of operation, an whether a user wishes to
+    perform the operation on a console message or lines in a file, and the appropriate
+    message entered or filename to read the messages"""
+
+    while True:
+        mode = input('Would you like to encode (e) or decode (d) : ')
+        if mode in ('e', 'd'):
+            (message, filename) = valid_mode_controller(mode)
+            break
+
+        print('Invalid mode')
+
+    return (mode, message, filename)
 
 
-"""
-MAIN DRIVER FUNCTION
-----------------------------------------------------------------------------------------------
-Requirements:
-    • Prompt users to select a mode: encode (e) or decode (d).
-    • Check if the mode the user entered is valid.
-    If not, continue to prompt the user until a valid mode is selected.
-    • Prompt the user for the message they would like to encode/decode.
-    • Encode/decode the message as appropriate and print the output.
-    • Prompt the user whether they would like to encode/decode another message.
-        • Check if the user has entered a valid input (y/n).
-          If not, continue to prompt the user until they enter a valid response.
-          Depending upon the response you should either:
-            • End the program if the user selects no.
-            • Proceed directly to step 2 if the user says yes.
-    • Your program should be as close as possible to the example shown in the assessment specification.
-
-Hints:
-    • Use the tuple MORSE_CODE above to convert between plain text/Morse code
-    • You can make use of str.split() to generate a list of Morse words and characters
-      by using the spaces between words and characters as a separator.
-    • You will also find str.join() useful for constructing a string from a list of strings.
-    • You should use a loop to keep the programming running if the user says that would like to
-      encode/decode another message after the first.
-    • Your program should handle both uppercase and lowercase inputs. You can make use of str.upper()
-      and str.lower() to convert a message to that case.
-    • Check the assessment specification for code examples.
-"""
-def main():
+def main_init():
+    """driver function for required tasks"""
     while True:
         (mode, message) = get_input()
         if mode == 'e':
@@ -131,11 +186,35 @@ def main():
         choice = input('Would you like to encode/decode another message? (y/n) : ')
         if choice in ('n', 'N'):
             break
-        elif choice in ('y', 'Y'):
+        if choice in ('y', 'Y'):
+            main_init()
+        print('Invalid response')
+
+
+def main():
+    """driver function for required and additional tasks"""
+    while True:
+        (mode, message, filename) = get_filename_input()
+        if filename is None:
+            if mode == 'e':
+                result = encode(message)
+                print(result)
+
+            elif mode == 'd':
+                result = decode(message)
+                print(result)
+
+        if message is None:
+            result = process_lines(filename, mode)
+            write_lines(result)
+
+        choice = input('Would you like to encode/decode another message? (y/n) : ')
+        if choice in ('n', 'N'):
+            return
+        if choice in ('y', 'Y'):
             main()
-        else: 
-            print('Invalid response')
-        
+        print('Invalid response')
+
 
 
 
